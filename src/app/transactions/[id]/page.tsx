@@ -4,7 +4,10 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Loader2 } from "lucide-react";
-import { fetchTransactionById, updateTransactionStatus } from "@/lib/fetch-transactions";
+import {
+  fetchTransactionById,
+  updateTransactionStatus,
+} from "@/lib/fetch-transactions";
 import { Transaction } from "@/interface/transaction";
 
 export default function TransactionDetailsPage() {
@@ -15,7 +18,7 @@ export default function TransactionDetailsPage() {
     data: transaction,
     isLoading,
     isError,
-  } = useQuery<Transaction>({
+  } = useQuery({
     queryKey: ["transaction", id],
     queryFn: () => fetchTransactionById(id),
     enabled: !!id,
@@ -50,7 +53,7 @@ export default function TransactionDetailsPage() {
         {/* Back */}
         <div className="mb-6 flex items-center">
           <Link
-            href="/admin/transactions"
+            href="/transactions"
             className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
           >
             <ArrowLeft className="w-4 h-4 mr-1" /> Back
@@ -62,7 +65,8 @@ export default function TransactionDetailsPage() {
           Transaction Details
         </h1>
         <p className="text-gray-600 mb-6 text-sm">
-          Reference: <span className="font-mono">{transaction.reference}</span>
+          Reference:{" "}
+          <span className="font-mono">{transaction.data.reference}</span>
         </p>
 
         {/* Student Info */}
@@ -71,12 +75,15 @@ export default function TransactionDetailsPage() {
             Student Information
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Detail label="Full Name" value={transaction.fullName} />
-            <Detail label="Email" value={transaction.email} />
-            <Detail label="Phone Number" value={transaction.phoneNumber} />
-            <Detail label="Matric Number" value={transaction.matricNumber} />
-            <Detail label="College" value={transaction.college} />
-            <Detail label="Department" value={transaction.department} />
+            <Detail label="Full Name" value={transaction.data.fullName} />
+            <Detail label="Email" value={transaction.data.email} />
+            <Detail label="Phone Number" value={transaction.data.phoneNumber} />
+            <Detail
+              label="Matric Number"
+              value={transaction.data.matricNumber}
+            />
+            <Detail label="College" value={transaction.data.college} />
+            <Detail label="Department" value={transaction.data.department} />
           </div>
         </div>
 
@@ -87,16 +94,15 @@ export default function TransactionDetailsPage() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Detail
-              label="Amount"
-              value={`₦${Number(transaction.amount).toLocaleString()}`}
+              label="Payment Method"
+              value={transaction.data.paymentMethod}
             />
-            <Detail label="Payment Method" value={transaction.paymentMethod} />
-            <Detail label="Bank" value={transaction.bank} />
-            <Detail label="Due Type" value={transaction.dueType} />
-            <Detail label="Status" value={transaction.status} status />
+
+            <Detail label="Due Type" value={transaction.data.dueType} />
+            <Detail label="Status" value={transaction.data.status} status />
             <Detail
               label="Date"
-              value={new Date(transaction.createdAt).toLocaleString()}
+              value={new Date(transaction.data.createdAt).toLocaleString()}
             />
           </div>
         </div>
@@ -106,9 +112,9 @@ export default function TransactionDetailsPage() {
           <h2 className="text-lg font-semibold text-gray-900 mb-3">
             Proof of Payment
           </h2>
-          {transaction.proofUrl ? (
+          {transaction.data.proofUrl ? (
             <img
-              src={transaction.proofUrl}
+              src={transaction.data.proofUrl}
               alt="Payment Proof"
               className="w-full max-w-md border rounded-md shadow-sm"
             />
@@ -119,30 +125,27 @@ export default function TransactionDetailsPage() {
 
         {/* Admin Actions */}
         <div className="border-t pt-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">
-            Admin Controls
-          </h2>
           <div className="flex items-center gap-4">
-            <button
-              onClick={() => mutation.mutate("success")}
+            <select
+              value={transaction.data.status}
+              onChange={(e) => mutation.mutate(e.target.value)}
               disabled={mutation.isPending}
-              className="px-4 py-2 bg-green-600 text-white rounded-md shadow hover:bg-green-700 disabled:opacity-50"
+              className="px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-700"
+            >
+              <option value="pending">Pending</option>
+              <option value="successful">Successful</option> {/* ✅ fixed */}
+              <option value="failed">Failed</option>
+            </select>
+
+            <button
+              onClick={() => mutation.mutate(transaction.data.status)}
+              disabled={mutation.isPending}
+              className="px-4 py-2 bg-indigo-600 text-white rounded-md shadow hover:bg-indigo-700 disabled:opacity-50"
             >
               {mutation.isPending ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
-                "Approve"
-              )}
-            </button>
-            <button
-              onClick={() => mutation.mutate("failed")}
-              disabled={mutation.isPending}
-              className="px-4 py-2 bg-red-600 text-white rounded-md shadow hover:bg-red-700 disabled:opacity-50"
-            >
-              {mutation.isPending ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                "Reject"
+                "Save Changes"
               )}
             </button>
           </div>
@@ -179,7 +182,7 @@ function Detail({
           className={`px-2 py-1 text-xs font-semibold rounded-full ${
             value === "pending"
               ? "bg-yellow-100 text-yellow-700"
-              : value === "success"
+              : value === "successful" // ✅ changed
               ? "bg-green-100 text-green-700"
               : "bg-red-100 text-red-700"
           }`}

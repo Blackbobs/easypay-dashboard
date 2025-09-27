@@ -78,15 +78,15 @@ export default function Home() {
         </div>
       ),
     },
-    {
-      accessorKey: "amount",
-      header: "Amount",
-      cell: (info) => (
-        <div className="font-medium text-primary">
-          ₦{Number(info.getValue()).toLocaleString()}
-        </div>
-      ),
-    },
+    // {
+    //   accessorKey: "amount",
+    //   header: "Amount",
+    //   cell: (info) => (
+    //     <div className="font-medium text-primary">
+    //       ₦{Number(info.getValue()).toLocaleString()}
+    //     </div>
+    //   ),
+    // },
     {
       accessorKey: "dueType",
       header: "Due",
@@ -198,7 +198,7 @@ export default function Home() {
             <h2 className="text-base text-nowrap font-bold">
               Recent Transactions
             </h2>
-            <Link href="/admin/transactions">
+            <Link href="/transactions">
               <button className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none cursor-pointer">
                 View All Transactions
               </button>

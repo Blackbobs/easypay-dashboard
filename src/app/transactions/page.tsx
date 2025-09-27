@@ -15,14 +15,15 @@ import { fetchAllTransaction } from "@/lib/fetch-transactions";
 
 export default function TransactionsPage() {
   const [page, setPage] = useState(1);
+
   const { data, isLoading } = useQuery({
     queryKey: ["allTransactions", page],
     queryFn: () => fetchAllTransaction(page, 10),
-    placeholderData: keepPreviousData
+    placeholderData: keepPreviousData,
   });
 
-  const transactions: RecentTransaction[] = data?.data ?? []; 
-const meta = data?.meta;
+  const transactions: RecentTransaction[] = data?.data ?? [];
+  const meta = data?.meta;
 
   const columns: ColumnDef<RecentTransaction>[] = [
     {
@@ -35,19 +36,12 @@ const meta = data?.meta;
       ),
     },
     {
-      accessorKey: "amount",
-      header: "Amount",
-      cell: (info) => (
-        <div className="font-medium text-primary">
-          ₦{Number(info.getValue()).toLocaleString()}
-        </div>
-      ),
-    },
-    {
       accessorKey: "dueType",
       header: "Due",
       cell: (info) => (
-        <div className="text-gray-600 text-nowrap">{info.getValue() as string}</div>
+        <div className="text-gray-600 text-nowrap">
+          {info.getValue() as string}
+        </div>
       ),
     },
     {
@@ -121,7 +115,10 @@ const meta = data?.meta;
                             key={header.id}
                             className="p-4 text-nowrap bg-secondary text-white font-medium"
                           >
-                            {flexRender(header.column.columnDef.header, header.getContext())}
+                            {flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
                           </th>
                         ))}
                       </tr>
@@ -131,11 +128,18 @@ const meta = data?.meta;
                     {table.getRowModel().rows.map((row, i) => (
                       <tr
                         key={row.id}
-                        className={i % 2 === 0 ? "bg-white" : "bg-gray-50 hover:bg-gray-100"}
+                        className={
+                          i % 2 === 0
+                            ? "bg-white"
+                            : "bg-gray-50 hover:bg-gray-100"
+                        }
                       >
                         {row.getVisibleCells().map((cell) => (
                           <td key={cell.id} className="p-4 text-gray-800">
-                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext()
+                            )}
                           </td>
                         ))}
                       </tr>
@@ -146,28 +150,32 @@ const meta = data?.meta;
             )}
           </div>
 
-          {/* Pagination Controls */}
-          {meta && (
-            <div className="flex justify-between items-center p-4 border-t text-sm text-gray-600">
-              <button
-                disabled={page === 1}
-                onClick={() => setPage((p) => p - 1)}
-                className="px-3 py-1 border rounded-md disabled:opacity-50"
-              >
-                Previous
-              </button>
-              <span>
-                Page {meta.page} of {meta.totalPages}
-              </span>
-              <button
-                disabled={page === meta.totalPages}
-                onClick={() => setPage((p) => p + 1)}
-                className="px-3 py-1 border rounded-md disabled:opacity-50"
-              >
-                Next
-              </button>
-            </div>
-          )}
+         {/* Pagination Controls */}
+{meta && (
+  <div className="flex justify-between items-center p-4 border-t text-sm text-gray-600">
+    <button
+      disabled={page === 1}
+      onClick={() => setPage((p) => p - 1)}
+      className="px-3 py-1 border rounded-md disabled:opacity-50"
+    >
+      Previous
+    </button>
+
+    {/* Current Page Indicator */}
+    <span>
+      Page {page} of {meta.totalPages}
+    </span>
+
+    <button
+      disabled={page === meta.totalPages}
+      onClick={() => setPage((p) => p + 1)}
+      className="px-3 py-1 border rounded-md disabled:opacity-50"
+    >
+      Next
+    </button>
+  </div>
+)}
+
         </div>
       </div>
     </div>
