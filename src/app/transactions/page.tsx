@@ -48,7 +48,7 @@ export default function TransactionsPage() {
 
   const { data, isLoading } = useQuery({
   queryKey: ["allTransactions", page, debouncedSearchTerm],
-  queryFn: () => fetchAllTransaction(page, 10),
+  queryFn: () => fetchAllTransaction(page, 50),
   placeholderData: keepPreviousData,
 });
 

@@ -11,7 +11,7 @@ export const fetchRecentTransactions = async () => {
     }
 }
 
-export const fetchAllTransaction = async (page = 1, limit = 10) => {
+export const fetchAllTransaction = async (page = 1, limit = 50) => {
     try {
         const response = await axiosConfig.get<TransactionsResponse>(`/transactions?page=${page}&limit=${limit}`)
         console.log(response)
