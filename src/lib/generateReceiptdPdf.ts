@@ -194,36 +194,6 @@ if (transaction.receiptName) {
 
   y -= 30;
 
-  // --- Amount Highlight ---
-  page.drawRectangle({
-    x: margin - 10,
-    y: y - 20,
-    width: pageWidth - 2 * margin + 20,
-    height: 40,
-    color: rgb(0.95, 0.97, 1),
-    borderColor: rgb(0.05, 0.35, 0.65),
-    borderWidth: 1,
-  });
-
-  page.drawText("AMOUNT PAID", {
-    x: margin,
-    y: y - 5,
-    size: 11,
-    font: fontBold,
-    color: rgb(0.4, 0.4, 0.4),
-  });
-
-  const amount = transaction.amount
-    ? `NGN ${transaction.amount.toLocaleString("en-NG")}`
-    : "NGN 4000/NGN 3000";
-
-  page.drawText(amount, {
-    x: pageWidth - margin - 150,
-    y: y - 5,
-    size: 16,
-    font: fontBold,
-    color: rgb(0.05, 0.35, 0.65),
-  });
 
  
   // --- Footer ---
