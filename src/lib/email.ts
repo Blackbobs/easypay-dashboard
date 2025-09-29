@@ -124,7 +124,7 @@ export const sendReceiptEmail = async (transaction: ITransaction) => {
     html: htmlContent,
     attachments: [
       {
-        filename: `receipt-${transaction.reference}.pdf`,
+        filename: `Receipt-${transaction.reference}.pdf`,
         content: pdfBuffer,
         contentType: "application/pdf",
       },

@@ -8,7 +8,7 @@ import {
   fetchTransactionById,
   updateTransactionStatus,
 } from "@/lib/fetch-transactions";
-import { Transaction } from "@/interface/transaction";
+import { ITransaction, Transaction } from "@/interface/transaction";
 import { useState } from "react";
 import Image from "next/image";
 import SendReceiptButton from "@/components/SendReceiptButton";
@@ -30,42 +30,39 @@ export default function TransactionDetailsPage() {
     enabled: !!id,
   });
 
-  const handleSendReceipt = async () => {
+const handleSendReceipt = async (transaction: ITransaction) => {
+  try {
+    const res = await fetch("/api/send-receipt", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(transaction),
+    });
 
-    try {
-      // setLoading(true);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Failed to send");
 
-      
-      const res = await fetch("/api/send-receipt", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(transaction?.data),
-      });
+    toast.success("Receipt sent successfully ✅");
+  } catch (err) {
+    console.error("Error sending receipt:", err);
+    toast.error("Failed to send receipt ❌");
+  }
+};
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to send");
+const mutation = useMutation({
+  mutationFn: (newStatus: string) => updateTransactionStatus(id, newStatus),
 
-      // alert("Receipt sent successfully ✅");
-      toast.success("Receipt sent successfully ✅");
-    } catch (err) {
-      console.error("Error sending receipt:", err);
-      // alert("Failed to send receipt ❌");
-      toast.error("Failed to send receipt ❌");
-    } 
-  };
-
-  const mutation = useMutation({
-    mutationFn: (newStatus: string) => updateTransactionStatus(id, newStatus),
-    onSuccess: (_data, variables) => {
+  // variables = newStatus, updatedTransaction = API response
+  onSuccess: (updatedTransaction, variables) => {
     queryClient.invalidateQueries({ queryKey: ["transaction", id] });
 
     console.log("Status updated to:", variables);
 
-    if (variables == "successful") {
-      handleSendReceipt();
+    if (variables === "successful") {
+      handleSendReceipt(updatedTransaction.data); // 🚀 fresh data, not stale
     }
   },
-  });
+});
+
 
 
   const copyReference = async () => {
