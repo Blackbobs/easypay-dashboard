@@ -12,6 +12,7 @@ import { Transaction } from "@/interface/transaction";
 import { useState } from "react";
 import Image from "next/image";
 import SendReceiptButton from "@/components/SendReceiptButton";
+import { toast } from "sonner";
 
 export default function TransactionDetailsPage() {
   const { id } = useParams<{ id: string }>();
@@ -30,8 +31,11 @@ export default function TransactionDetailsPage() {
   });
 
   const handleSendReceipt = async () => {
+
     try {
       // setLoading(true);
+
+      
       const res = await fetch("/api/send-receipt", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -41,20 +45,28 @@ export default function TransactionDetailsPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to send");
 
-      alert("Receipt sent successfully ✅");
+      // alert("Receipt sent successfully ✅");
+      toast.success("Receipt sent successfully ✅");
     } catch (err) {
       console.error("Error sending receipt:", err);
-      alert("Failed to send receipt ❌");
+      // alert("Failed to send receipt ❌");
+      toast.error("Failed to send receipt ❌");
     } 
   };
 
   const mutation = useMutation({
     mutationFn: (newStatus: string) => updateTransactionStatus(id, newStatus),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["transaction", id] });
+    onSuccess: (_data, variables) => {
+    queryClient.invalidateQueries({ queryKey: ["transaction", id] });
+
+    console.log("Status updated to:", variables);
+
+    if (variables == "successful") {
       handleSendReceipt();
-    },
+    }
+  },
   });
+
 
   const copyReference = async () => {
     if (transaction?.data.reference) {

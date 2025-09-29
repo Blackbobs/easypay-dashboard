@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import {
@@ -44,14 +45,21 @@ export default function TransactionsPage() {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["allTransactions", page],
-    queryFn: () => fetchAllTransaction(page, 10),
-    placeholderData: keepPreviousData,
-  });
 
-  const transactions: RecentTransaction[] = data?.data ?? [];
-  const meta = data?.meta;
+  const { data, isLoading } = useQuery({
+  queryKey: ["allTransactions", page, debouncedSearchTerm],
+  queryFn: () => fetchAllTransaction(page, 10),
+  placeholderData: keepPreviousData,
+});
+
+console.log(data, "all data")
+
+const transactions: RecentTransaction[] = data?.data ?? [];
+const meta = data?.meta;
+
+
+
+  
 
   // Filter transactions based on search term
   const filteredTransactions = useMemo(() => {
@@ -277,6 +285,8 @@ export default function TransactionsPage() {
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
+
+        
                 {searchTerm && (
                   <button
                     onClick={clearSearch}
@@ -287,6 +297,8 @@ export default function TransactionsPage() {
                 )}
               </div>
             </div>
+
+                         
 
             {/* Search Results Info */}
             {debouncedSearchTerm && (
@@ -378,53 +390,66 @@ export default function TransactionsPage() {
                     ))}
                   </tbody>
                 </table>
+
+{meta && (
+  <div className="bg-gray-50 px-6 py-4 border-t border-gray-200">
+    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex items-center gap-2 text-sm text-gray-600">
+        <Users className="w-4 h-4" />
+        <span>
+          Showing{" "}
+          <span className="font-medium text-gray-900">
+            {(meta.page - 1) * meta.limit + 1}
+          </span>{" "}
+          to{" "}
+          <span className="font-medium text-gray-900">
+            {Math.min(meta.page * meta.limit, meta.total)}
+          </span>{" "}
+          of{" "}
+          <span className="font-medium text-gray-900">{meta.total}</span>{" "}
+          transactions
+        </span>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <button
+          disabled={meta.page === 1}
+          onClick={() => setPage((p) => p - 1)}
+          className="inline-flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+        >
+          <ChevronLeft className="w-4 h-4" />
+          Previous
+        </button>
+
+        <div className="flex items-center gap-1">
+          <span className="px-2 py-2 text-sm font-semibold  text-secondary rounded-lg">
+            {meta.page}
+          </span>
+          <span className="px-2 text-sm text-gray-500">of</span>
+          <span className="px-3 py-2 text-sm font-semibold text-primary rounded-lg">
+            {meta.totalPages}
+          </span>
+        </div>
+
+        <button
+          disabled={meta.page === meta.totalPages}
+          onClick={() => setPage((p) => p + 1)}
+          className="inline-flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+        >
+          Next
+          <ChevronRight className="w-4 h-4" />
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+
+
+
               </div>
 
-              {/* Enhanced Pagination */}
-              {meta && !debouncedSearchTerm && (
-                <div className="bg-gray-50 px-6 py-4 border-t border-gray-200">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Users className="w-4 h-4" />
-                      <span>
-                        Showing <span className="font-medium text-gray-900">{((page - 1) * 10) + 1}</span> to{' '}
-                        <span className="font-medium text-gray-900">{Math.min(page * 10, meta.total)}</span> of{' '}
-                        <span className="font-medium text-gray-900">{meta.total}</span> transactions
-                      </span>
-                    </div>
-                    
-                    <div className="flex items-center gap-2">
-                      <button
-                        disabled={page === 1}
-                        onClick={() => setPage((p) => p - 1)}
-                        className="inline-flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                      >
-                        <ChevronLeft className="w-4 h-4" />
-                        Previous
-                      </button>
 
-                      <div className="flex items-center gap-1">
-                        <span className="px-3 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg">
-                          {page}
-                        </span>
-                        <span className="px-2 text-sm text-gray-500">of</span>
-                        <span className="px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg">
-                          {meta.totalPages}
-                        </span>
-                      </div>
-
-                      <button
-                        disabled={page === meta.totalPages}
-                        onClick={() => setPage((p) => p + 1)}
-                        className="inline-flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                      >
-                        Next
-                        <ChevronRight className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
             </>
           )}
         </div>
