@@ -11,6 +11,7 @@ import {
 import { Transaction } from "@/interface/transaction";
 import { useState } from "react";
 import Image from "next/image";
+import SendReceiptButton from "@/components/SendReceiptButton";
 
 export default function TransactionDetailsPage() {
   const { id } = useParams<{ id: string }>();
@@ -28,10 +29,30 @@ export default function TransactionDetailsPage() {
     enabled: !!id,
   });
 
+  const handleSendReceipt = async () => {
+    try {
+      // setLoading(true);
+      const res = await fetch("/api/send-receipt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(transaction?.data),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to send");
+
+      alert("Receipt sent successfully ✅");
+    } catch (err) {
+      console.error("Error sending receipt:", err);
+      alert("Failed to send receipt ❌");
+    } 
+  };
+
   const mutation = useMutation({
     mutationFn: (newStatus: string) => updateTransactionStatus(id, newStatus),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["transaction", id] });
+      handleSendReceipt();
     },
   });
 
@@ -291,6 +312,7 @@ export default function TransactionDetailsPage() {
                     <p className="text-green-700 text-sm font-medium">
                       Status updated successfully
                     </p>
+                    {/* <SendReceiptButton transaction={transaction.data}  /> */}
                   </div>
                 )}
                 

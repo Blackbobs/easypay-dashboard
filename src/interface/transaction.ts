@@ -19,6 +19,26 @@ export interface TransactionsResponse {
     success: boolean
   }
 
+  export interface ITransaction  {
+  amount?: number;
+  college: string;
+  createdAt: Date;
+  department?: Department;
+  dueType: DueType;
+  email: string;
+  fullName: string;
+  hostel?: string;
+  matricNumber: string;
+  paymentMethod: PaymentMethod;
+  phoneNumber: string;
+  proofUrl: string;
+  receiptName?: string;
+  reference: string;
+  roomNumber?: string;
+  status: Status;
+  updatedAt: Date;
+}
+
   export interface Transaction {
     amount: number;
     bank: string;
