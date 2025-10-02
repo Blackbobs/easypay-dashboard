@@ -36,6 +36,7 @@ export interface TransactionsResponse {
   reference: string;
   roomNumber?: string;
   status: Status;
+  studentType: string;
   updatedAt: Date;
 }
 

@@ -3,7 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Loader2, User, CreditCard, FileText, Settings, CheckCircle, XCircle, Clock, Copy, Eye } from "lucide-react";
+import { ArrowLeft, Loader2, User, CreditCard, FileText, Settings, CheckCircle, XCircle, Clock, Copy, Eye, Building, Home, Receipt } from "lucide-react";
 import {
   fetchTransactionById,
   updateTransactionStatus,
@@ -191,6 +191,7 @@ const mutation = useMutation({
                   <DetailField label="Matric Number" value={transaction.data.matricNumber} />
                   <DetailField label="College" value={transaction.data.college} />
                   <DetailField label="Department" value={transaction.data.department} />
+                  <DetailField label="Student Type" value={transaction.data.studentType} />
                 </div>
               </div>
             </div>
@@ -225,9 +226,34 @@ const mutation = useMutation({
                       minute: '2-digit'
                     })}
                   />
+                  <DetailField 
+                    label="Amount" 
+                    value={`₦${transaction.data.amount?.toLocaleString()}`} 
+                  />
+                  <DetailField label="Receipt Name" value={transaction.data.receiptName} />
                 </div>
               </div>
             </div>
+
+            {/* Accommodation Information */}
+            {(transaction.data.hostel || transaction.data.roomNumber) && (
+              <div className="bg-white shadow-sm rounded-xl border border-gray-200 overflow-hidden">
+                <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-purple-100 rounded-lg">
+                      <Home className="w-5 h-5 text-purple-600" />
+                    </div>
+                    <h2 className="text-lg font-semibold text-gray-900">Accommodation Information</h2>
+                  </div>
+                </div>
+                <div className="p-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <DetailField label="Hostel" value={transaction.data.hostel} />
+                    <DetailField label="Room Number" value={transaction.data.roomNumber} />
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Sidebar */}
