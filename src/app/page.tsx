@@ -29,11 +29,13 @@ import {
   Download,
   RefreshCw,
   MoreHorizontal,
-  Trash2
+  Trash2,
+  LogOut,
+  User
 } from "lucide-react";
 import { fetchRecentTransactions, deleteTransaction } from "@/lib/fetch-transactions";
 import { RecentTransaction } from "@/interface/transaction";
-import { useCurrentUser, useCanPerformActions } from "@/hooks/useUser";
+import { useCurrentUser, useLogout, useCanPerformActions, User as UserType } from "@/hooks/useUser";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -111,10 +113,82 @@ function DeleteConfirmationModal({
   );
 }
 
+// User Profile Dropdown Component
+function UserProfileDropdown({ user, onLogout }: { user: UserType; onLogout: () => void }) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center gap-3 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+      >
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+            <User className="w-4 h-4 text-blue-600" />
+          </div>
+          <div className="text-left">
+            <p className="font-medium text-gray-900 text-sm">{user.username}</p>
+            <p className="text-xs text-gray-500 capitalize">{user.role}</p>
+          </div>
+        </div>
+      </button>
+
+      {isOpen && (
+        <>
+          {/* Backdrop */}
+          <div 
+            className="fixed inset-0 z-40" 
+            onClick={() => setIsOpen(false)}
+          />
+          
+          {/* Dropdown Menu */}
+          <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-gray-200 z-50 overflow-hidden">
+            <div className="p-4 border-b border-gray-100">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                  <User className="w-5 h-5 text-blue-600" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-gray-900 text-sm truncate">
+                    {user.username}
+                  </p>
+                  <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                  <div className="flex items-center gap-1 mt-1">
+                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 capitalize">
+                      {user.role}
+                    </span>
+                    {user.college && (
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 truncate">
+                        {user.college}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="p-2">
+              <button
+                onClick={onLogout}
+                className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-red-600 rounded-lg hover:bg-red-50 transition-colors duration-200"
+              >
+                <LogOut className="w-4 h-4" />
+                Sign Out
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 export default function Home() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { data: user, isLoading: userLoading } = useCurrentUser();
+  const logoutMutation = useLogout();
   const canPerformActions = useCanPerformActions();
   const [deleteModal, setDeleteModal] = useState<{
     isOpen: boolean;
@@ -153,6 +227,11 @@ export default function Home() {
     } catch (error) {
       console.error("Failed to delete transaction:", error);
     }
+  };
+
+  // Handle logout
+  const handleLogout = () => {
+    logoutMutation.mutate();
   };
 
   // Calculate dynamic stats from actual data
@@ -344,20 +423,23 @@ export default function Home() {
                 <p className="text-gray-600 flex items-center gap-2">
                   <Activity className="w-4 h-4" />
                   Monitor student payments and platform performance in real-time
-                  {user?.role && (
-                    <span className="text-sm font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded-md">
-                      {user.role === 'superAdmin' ? 'Super Admin' : 'Admin'}
-                    </span>
-                  )}
                 </p>
               </div>
               
               <div className="flex items-center gap-3">
+                {/* User Profile Dropdown */}
+                {user && (
+                  <UserProfileDropdown 
+                    user={user} 
+                    onLogout={handleLogout}
+                  />
+                )}
+                
                 <button className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 hover:border-gray-400 hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
                   <RefreshCw className="w-4 h-4" />
                   Refresh
                 </button>
-                <button className="inline-flex items-center  px-4 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg shadow-sm hover:bg-blue-700 hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                <button className="inline-flex items-center px-4 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg shadow-sm hover:bg-blue-700 hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
                   <Download className="w-4 h-4 mr-2" />
                   Export&nbsp;
                   <span className="max-md:hidden">Report</span>
@@ -530,4 +612,4 @@ export default function Home() {
       />
     </>
   );
-} 
+}
