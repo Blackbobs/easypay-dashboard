@@ -37,3 +37,13 @@ export const deleteTransaction = async (id: string) => {
   const response = await axiosConfig.delete(`/transactions/${id}`);
   return response.data;
 };
+
+export const searchTransactions = async (query: string) => {
+  try {
+    const response = await axiosConfig.get(`/transactions/search?query=${encodeURIComponent(query)}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error searching transactions:", error);
+    throw error;
+  }
+};

@@ -20,6 +20,7 @@ export interface TransactionsResponse {
   }
 
   export interface ITransaction  {
+    _id: string;
   amount?: number;
   college: string;
   createdAt: Date;
@@ -41,6 +42,7 @@ export interface TransactionsResponse {
 }
 
   export interface Transaction {
+    _id: string;
     amount: number;
     bank: string;
     college: College;

@@ -31,11 +31,20 @@ import {
   MoreHorizontal,
   Trash2,
   LogOut,
-  User
+  User,
+  Search,
 } from "lucide-react";
-import { fetchRecentTransactions, deleteTransaction } from "@/lib/fetch-transactions";
+import {
+  fetchRecentTransactions,
+  deleteTransaction,
+} from "@/lib/fetch-transactions";
 import { RecentTransaction } from "@/interface/transaction";
-import { useCurrentUser, useLogout, useCanPerformActions, User as UserType } from "@/hooks/useUser";
+import {
+  useCurrentUser,
+  useLogout,
+  useCanPerformActions,
+  User as UserType,
+} from "@/hooks/useUser";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -45,12 +54,12 @@ interface Transaction {
 }
 
 // Delete Confirmation Modal Component
-function DeleteConfirmationModal({ 
-  isOpen, 
-  onClose, 
-  onConfirm, 
-  transaction 
-}: { 
+function DeleteConfirmationModal({
+  isOpen,
+  onClose,
+  onConfirm,
+  transaction,
+}: {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
@@ -75,7 +84,7 @@ function DeleteConfirmationModal({
               </p>
             </div>
           </div>
-          
+
           <div className="bg-gray-50 rounded-lg p-4 mb-6">
             <p className="text-sm text-gray-700 mb-2">
               <strong>Email:</strong> {transaction.email}
@@ -89,7 +98,8 @@ function DeleteConfirmationModal({
           </div>
 
           <p className="text-gray-600 mb-6">
-            Are you sure you want to delete this transaction? All associated data will be permanently removed.
+            Are you sure you want to delete this transaction? All associated
+            data will be permanently removed.
           </p>
 
           <div className="flex gap-3 justify-end">
@@ -114,7 +124,13 @@ function DeleteConfirmationModal({
 }
 
 // User Profile Dropdown Component
-function UserProfileDropdown({ user, onLogout }: { user: UserType; onLogout: () => void }) {
+function UserProfileDropdown({
+  user,
+  onLogout,
+}: {
+  user: UserType;
+  onLogout: () => void;
+}) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -137,11 +153,11 @@ function UserProfileDropdown({ user, onLogout }: { user: UserType; onLogout: () 
       {isOpen && (
         <>
           {/* Backdrop */}
-          <div 
-            className="fixed inset-0 z-40" 
+          <div
+            className="fixed inset-0 z-40"
             onClick={() => setIsOpen(false)}
           />
-          
+
           {/* Dropdown Menu */}
           <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-gray-200 z-50 overflow-hidden">
             <div className="p-4 border-b border-gray-100">
@@ -167,7 +183,7 @@ function UserProfileDropdown({ user, onLogout }: { user: UserType; onLogout: () 
                 </div>
               </div>
             </div>
-            
+
             <div className="p-2">
               <button
                 onClick={onLogout}
@@ -195,7 +211,7 @@ export default function Home() {
     transaction: RecentTransaction | null;
   }>({
     isOpen: false,
-    transaction: null
+    transaction: null,
   });
 
   const { data: transactions = [], isLoading } = useQuery({
@@ -215,15 +231,14 @@ export default function Home() {
 
     try {
       await deleteTransaction(deleteModal.transaction._id);
-      
+
       // Invalidate and refetch the transactions query
       await queryClient.invalidateQueries({ queryKey: ["recentTransactions"] });
-      
+
       // Close the modal
       setDeleteModal({ isOpen: false, transaction: null });
-      
+
       console.log("Transaction deleted successfully");
-      
     } catch (error) {
       console.error("Failed to delete transaction:", error);
     }
@@ -251,8 +266,9 @@ export default function Home() {
     ).length;
 
     // Calculate success rate
-    const successRate = total > 0 ? ((successful / total) * 100).toFixed(1) : "0.0";
-    
+    const successRate =
+      total > 0 ? ((successful / total) * 100).toFixed(1) : "0.0";
+
     return [
       {
         title: "Total Transactions",
@@ -262,7 +278,7 @@ export default function Home() {
         color: "text-blue-600",
         bgColor: "bg-blue-50",
         borderColor: "border-blue-200",
-        trend: "up"
+        trend: "up",
       },
       {
         title: "Successful Payments",
@@ -272,7 +288,7 @@ export default function Home() {
         color: "text-emerald-600",
         bgColor: "bg-emerald-50",
         borderColor: "border-emerald-200",
-        trend: "up"
+        trend: "up",
       },
       {
         title: "Pending Reviews",
@@ -282,7 +298,7 @@ export default function Home() {
         color: "text-amber-600",
         bgColor: "bg-amber-50",
         borderColor: "border-amber-200",
-        trend: pending > 5 ? "down" : "up"
+        trend: pending > 5 ? "down" : "up",
       },
     ];
   }, [transactions]);
@@ -323,15 +339,17 @@ export default function Home() {
         const status = info.getValue() as string;
         const isSuccess = status === "success" || status === "successful";
         const isPending = status === "pending";
-        
+
         return (
-          <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border ${
-            isPending
-              ? "bg-amber-50 text-amber-700 border-amber-200"
-              : isSuccess
-              ? "bg-emerald-50 text-emerald-700 border-emerald-200"  
-              : "bg-red-50 text-red-700 border-red-200"
-          }`}>
+          <div
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border ${
+              isPending
+                ? "bg-amber-50 text-amber-700 border-amber-200"
+                : isSuccess
+                ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                : "bg-red-50 text-red-700 border-red-200"
+            }`}
+          >
             {isPending ? (
               <Clock className="w-3 h-3" />
             ) : isSuccess ? (
@@ -350,16 +368,16 @@ export default function Home() {
       cell: (info) => (
         <div className="flex flex-col">
           <div className="text-sm font-medium text-gray-900">
-            {new Date(info.getValue() as string).toLocaleDateString('en-US', {
-              month: 'short',
-              day: 'numeric',
-              year: 'numeric'
+            {new Date(info.getValue() as string).toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
             })}
           </div>
           <div className="text-xs text-gray-500">
-            {new Date(info.getValue() as string).toLocaleTimeString('en-US', {
-              hour: '2-digit',
-              minute: '2-digit'
+            {new Date(info.getValue() as string).toLocaleTimeString("en-US", {
+              hour: "2-digit",
+              minute: "2-digit",
             })}
           </div>
         </div>
@@ -379,8 +397,10 @@ export default function Home() {
               </button>
             </Link>
             {canPerformActions && (
-              <button 
-                onClick={() => setDeleteModal({ isOpen: true, transaction: txn })}
+              <button
+                onClick={() =>
+                  setDeleteModal({ isOpen: true, transaction: txn })
+                }
                 className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-red-700 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 hover:border-red-300 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-500/20"
               >
                 <Trash2 className="w-4 h-4" />
@@ -412,7 +432,6 @@ export default function Home() {
     <>
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          
           {/* Enhanced Welcome Section */}
           <div className="mb-8">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -425,16 +444,16 @@ export default function Home() {
                   Monitor student payments and platform performance in real-time
                 </p>
               </div>
-              
+
               <div className="flex items-center gap-3">
-                {/* User Profile Dropdown */}
-                {user && (
-                  <UserProfileDropdown 
-                    user={user} 
-                    onLogout={handleLogout}
-                  />
-                )}
-                
+                <Link href="/search">
+                  <button className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 hover:border-gray-400 hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                    <Search className="w-4 h-4" />
+                    Search
+                  </button>
+                </Link>
+               
+
                 <button className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 hover:border-gray-400 hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
                   <RefreshCw className="w-4 h-4" />
                   Refresh
@@ -444,6 +463,10 @@ export default function Home() {
                   Export&nbsp;
                   <span className="max-md:hidden">Report</span>
                 </button>
+                 {/* User Profile Dropdown */}
+                 {user && (
+                  <UserProfileDropdown user={user} onLogout={handleLogout} />
+                )}
               </div>
             </div>
           </div>
@@ -468,7 +491,7 @@ export default function Home() {
                       )}
                     </div>
                   </div>
-                  
+
                   <div>
                     <p className="text-sm font-medium text-gray-600 mb-1">
                       {stat.title}
@@ -476,9 +499,13 @@ export default function Home() {
                     <p className="text-3xl font-bold text-gray-900 mb-2">
                       {stat.value}
                     </p>
-                    <p className={`text-sm font-medium flex items-center ${
-                      stat.trend === "up" ? "text-emerald-600" : "text-amber-600"
-                    }`}>
+                    <p
+                      className={`text-sm font-medium flex items-center ${
+                        stat.trend === "up"
+                          ? "text-emerald-600"
+                          : "text-amber-600"
+                      }`}
+                    >
                       {stat.change}
                     </p>
                   </div>
@@ -505,7 +532,7 @@ export default function Home() {
                     </p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center gap-3">
                   <button className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200">
                     <Filter className="w-4 h-4" />
@@ -529,8 +556,12 @@ export default function Home() {
                     <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
                     <div className="absolute inset-0 rounded-full border-2 border-blue-100"></div>
                   </div>
-                  <p className="text-gray-600 mt-4 font-medium">Loading recent transactions...</p>
-                  <p className="text-gray-400 text-sm mt-1">Fetching the latest data</p>
+                  <p className="text-gray-600 mt-4 font-medium">
+                    Loading recent transactions...
+                  </p>
+                  <p className="text-gray-400 text-sm mt-1">
+                    Fetching the latest data
+                  </p>
                 </div>
               ) : !transactions?.data?.length ? (
                 <div className="flex flex-col items-center justify-center py-12">
@@ -541,7 +572,8 @@ export default function Home() {
                     No transactions yet
                   </h3>
                   <p className="text-gray-500 text-center max-w-md">
-                    When students make payments, they&apos;ll appear here. Check back soon for updates.
+                    When students make payments, they&apos;ll appear here. Check
+                    back soon for updates.
                   </p>
                 </div>
               ) : (
@@ -549,7 +581,10 @@ export default function Home() {
                   <table className="w-full">
                     <thead>
                       {table.getHeaderGroups().map((headerGroup) => (
-                        <tr key={headerGroup.id} className="border-b border-gray-200 bg-gray-50">
+                        <tr
+                          key={headerGroup.id}
+                          className="border-b border-gray-200 bg-gray-50"
+                        >
                           {headerGroup.headers.map((header) => (
                             <th
                               key={header.id}
@@ -571,7 +606,10 @@ export default function Home() {
                           className="hover:bg-gray-50 transition-colors duration-150"
                         >
                           {row.getVisibleCells().map((cell) => (
-                            <td key={cell.id} className="px-6 py-4 whitespace-nowrap">
+                            <td
+                              key={cell.id}
+                              className="px-6 py-4 whitespace-nowrap"
+                            >
                               {flexRender(
                                 cell.column.columnDef.cell,
                                 cell.getContext()
@@ -591,9 +629,13 @@ export default function Home() {
               <div className="bg-gray-50 px-6 py-3 border-t border-gray-200">
                 <div className="flex items-center justify-between text-sm text-gray-600">
                   <span>
-                    Showing {Math.min(10, transactions.data.length)} of {transactions.data.length} recent transactions
+                    Showing {Math.min(10, transactions.data.length)} of{" "}
+                    {transactions.data.length} recent transactions
                   </span>
-                  <Link href="/transactions" className="text-blue-600 hover:text-blue-700 font-medium">
+                  <Link
+                    href="/transactions"
+                    className="text-blue-600 hover:text-blue-700 font-medium"
+                  >
                     View all →
                   </Link>
                 </div>

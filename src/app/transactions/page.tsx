@@ -29,10 +29,12 @@ import {
   CreditCard,
   TrendingUp,
   Calendar,
-  Trash2
+  Trash2,
+  ArrowLeft
 } from "lucide-react";
 import { fetchAllTransaction, deleteTransaction } from "@/lib/fetch-transactions";
 import { useCanPerformActions } from "@/hooks/useUser";
+import { useRouter } from "next/navigation";
 
 // Delete Confirmation Modal Component
 function DeleteConfirmationModal({ 
@@ -107,6 +109,7 @@ function DeleteConfirmationModal({
 }
 
 export default function TransactionsPage() {
+  const router = useRouter();
   const queryClient = useQueryClient();
   const canPerformActions = useCanPerformActions();
   const [page, setPage] = useState(1);
@@ -308,7 +311,15 @@ export default function TransactionsPage() {
           
           {/* Header Section */}
           <div className="mb-8">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            {/* Back Button and Title */}
+            <div className="flex items-center gap-4 mb-6">
+              <Link
+                href="/"
+                className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Dashboard
+              </Link>
               <div>
                 <h1 className="text-3xl font-bold text-gray-900 mb-2">
                   Transaction Management
@@ -316,6 +327,18 @@ export default function TransactionsPage() {
                 <p className="text-gray-600">
                   Monitor and manage all student transactions in one place
                 </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+              <div className="flex items-center gap-3">
+                {/* Search Button */}
+                <Link href="/search">
+                  <button className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 hover:border-gray-400 hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                    <Search className="w-4 h-4" />
+                    Advanced Search
+                  </button>
+                </Link>
               </div>
               
               <div className="flex items-center gap-3">
@@ -442,15 +465,23 @@ export default function TransactionsPage() {
                     : "There are no transactions to display at the moment. New transactions will appear here once they're created."
                   }
                 </p>
-                {debouncedSearchTerm && (
-                  <button
-                    onClick={clearSearch}
-                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors duration-200"
-                  >
-                    <X className="w-4 h-4" />
-                    Clear Search
-                  </button>
-                )}
+                <div className="flex gap-3">
+                  {debouncedSearchTerm && (
+                    <button
+                      onClick={clearSearch}
+                      className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors duration-200"
+                    >
+                      <X className="w-4 h-4" />
+                      Clear Search
+                    </button>
+                  )}
+                  <Link href="/search">
+                    <button className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200">
+                      <Search className="w-4 h-4" />
+                      Advanced Search
+                    </button>
+                  </Link>
+                </div>
               </div>
             ) : (
               <>
