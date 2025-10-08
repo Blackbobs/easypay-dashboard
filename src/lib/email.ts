@@ -37,6 +37,7 @@ export const sendReceiptEmail = async (transaction: ITransaction) => {
     college: transaction.college,
     department: transaction.department,
     studentType: transaction.studentType,
+     level: transaction.level,
     dueType: transaction.dueType,
     paymentMethod: transaction.paymentMethod,
     amount: formatCurrency(transaction.amount || 0),
@@ -334,6 +335,12 @@ export const sendReceiptEmail = async (transaction: ITransaction) => {
                         <span class="info-label">Student Type</span>
                         <span class="info-value">${
                           payload.studentType || "Not provided"
+                        }</span>
+                    </div>
+                     <div class="info-item">
+                        <span class="info-label">Level</span>
+                        <span class="info-value">${
+                          payload.level || "Not provided"
                         }</span>
                     </div>
                 </div>

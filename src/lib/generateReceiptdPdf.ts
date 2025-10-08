@@ -145,6 +145,7 @@ export const generateReceiptPdf = async (transaction: ITransaction): Promise<Buf
     { label: "College", value: transaction.college },
     { label: "Department", value: transaction.department },
     { label: "Student Type", value: transaction.studentType },
+      { label: "Level", value: transaction.level },
   ];
 
   for (const detail of studentDetails) {
