@@ -65,6 +65,11 @@ export interface TransactionsResponse {
   }
   
 export enum Department {
+  ABG = "ABG",
+  ANN = "ANN",
+  PRM = "PRM",
+  ANP = "ANP",
+  APH = "APH",
   AGAD = "AGAD",
   AEFM = "AEFM",
   ARED = "ARED",
