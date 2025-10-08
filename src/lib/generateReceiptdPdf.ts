@@ -2,14 +2,16 @@ import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import type { ITransaction } from "@/interface/transaction";
 import QRCode from "qrcode";
 
-export const generateReceiptPdf = async (transaction: ITransaction): Promise<Buffer> => {
+export const generateReceiptPdf = async (
+  transaction: ITransaction
+): Promise<Buffer> => {
   const pdfDoc = await PDFDocument.create();
   const page = pdfDoc.addPage([595, 842]); // A4
   const { width: pageWidth, height: pageHeight } = page.getSize();
-  
+
   const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
   const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-  
+
   const margin = 40;
   let y = pageHeight - margin;
 
@@ -49,13 +51,16 @@ export const generateReceiptPdf = async (transaction: ITransaction): Promise<Buf
 
   // Reference and Date
   const receiptNumber = `#${transaction.reference}`;
-  const receiptDate = new Date(transaction.createdAt).toLocaleDateString("en-NG", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit"
-  });
+  const receiptDate = new Date(transaction.createdAt).toLocaleDateString(
+    "en-NG",
+    {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    }
+  );
 
   page.drawText(receiptNumber, {
     x: pageWidth - margin - 200,
@@ -76,11 +81,12 @@ export const generateReceiptPdf = async (transaction: ITransaction): Promise<Buf
   y = pageHeight - headerHeight - 30;
 
   // Status Badge
-  const statusColor = transaction.status === "successful" 
-    ? rgb(0.2, 0.8, 0.2) 
-    : transaction.status === "failed" 
-    ? rgb(0.8, 0.2, 0.2) 
-    : rgb(0.9, 0.6, 0.1);
+  const statusColor =
+    transaction.status === "successful"
+      ? rgb(0.2, 0.8, 0.2)
+      : transaction.status === "failed"
+      ? rgb(0.8, 0.2, 0.2)
+      : rgb(0.9, 0.6, 0.1);
 
   page.drawRectangle({
     x: margin,
@@ -105,7 +111,7 @@ export const generateReceiptPdf = async (transaction: ITransaction): Promise<Buf
   // Amount Section - Fixed: Use "NGN" instead of "₦"
   const amountValue = (transaction.amount || 0).toLocaleString();
   const amountText = `NGN ${amountValue}`;
-  
+
   page.drawText("Amount Paid", {
     x: margin,
     y,
@@ -145,12 +151,12 @@ export const generateReceiptPdf = async (transaction: ITransaction): Promise<Buf
     { label: "College", value: transaction.college },
     { label: "Department", value: transaction.department },
     { label: "Student Type", value: transaction.studentType },
-      { label: "Level", value: transaction.level },
+    { label: "Level", value: transaction.level },
   ];
 
   for (const detail of studentDetails) {
     if (!detail.value) continue;
-    
+
     page.drawText(detail.label + ":", {
       x: margin,
       y,
@@ -160,7 +166,7 @@ export const generateReceiptPdf = async (transaction: ITransaction): Promise<Buf
     });
 
     // Handle special characters by converting to safe string
-    const safeValue = String(detail.value).replace(/[^\x00-\x7F]/g, '');
+    const safeValue = String(detail.value).replace(/[^\x00-\x7F]/g, "");
     page.drawText(safeValue, {
       x: margin + 120,
       y,
@@ -195,7 +201,10 @@ export const generateReceiptPdf = async (transaction: ITransaction): Promise<Buf
         color: darkGray,
       });
 
-      const safeHostel = String(transaction.hostel).replace(/[^\x00-\x7F]/g, '');
+      const safeHostel = String(transaction.hostel).replace(
+        /[^\x00-\x7F]/g,
+        ""
+      );
       page.drawText(safeHostel, {
         x: margin + 120,
         y,
@@ -215,7 +224,10 @@ export const generateReceiptPdf = async (transaction: ITransaction): Promise<Buf
         color: darkGray,
       });
 
-      const safeRoomNumber = String(transaction.roomNumber).replace(/[^\x00-\x7F]/g, '');
+      const safeRoomNumber = String(transaction.roomNumber).replace(
+        /[^\x00-\x7F]/g,
+        ""
+      );
       page.drawText(safeRoomNumber, {
         x: margin + 120,
         y,
@@ -248,7 +260,7 @@ export const generateReceiptPdf = async (transaction: ITransaction): Promise<Buf
 
   for (const detail of transactionDetails) {
     if (!detail.value) continue;
-    
+
     page.drawText(detail.label + ":", {
       x: margin,
       y,
@@ -257,7 +269,7 @@ export const generateReceiptPdf = async (transaction: ITransaction): Promise<Buf
       color: darkGray,
     });
 
-    const safeValue = String(detail.value).replace(/[^\x00-\x7F]/g, '');
+    const safeValue = String(detail.value).replace(/[^\x00-\x7F]/g, "");
     page.drawText(safeValue, {
       x: margin + 120,
       y,
@@ -300,7 +312,7 @@ export const generateReceiptPdf = async (transaction: ITransaction): Promise<Buf
 
   // Footer
   const footerY = 60;
-  
+
   page.drawText("Thank you for your payment!", {
     x: margin,
     y: footerY,
