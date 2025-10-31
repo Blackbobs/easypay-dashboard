@@ -13,26 +13,21 @@ import {
   Users,
   TrendingUp,
   DollarSign,
-  Calendar,
   Eye,
+  Settings,
   ArrowUpRight,
   Activity,
   CheckCircle,
   Clock,
-  XCircle,
-  BarChart3,
-  Zap,
-  Target,
   TrendingDown,
-  Plus,
   Filter,
   Download,
   RefreshCw,
-  MoreHorizontal,
   Trash2,
   LogOut,
   User,
   Search,
+  XCircle,
 } from "lucide-react";
 import {
   fetchRecentTransactions,
@@ -43,10 +38,13 @@ import {
   useCurrentUser,
   useLogout,
   useCanPerformActions,
+  // useIsAdmin,
+  useAdminTotalAmount,
   User as UserType,
 } from "@/hooks/useUser";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import SetAdminAmountModal from "@/components/SetAdminAmountModal";
 
 interface Transaction {
   id: string;
@@ -206,6 +204,8 @@ export default function Home() {
   const { data: user, isLoading: userLoading } = useCurrentUser();
   const logoutMutation = useLogout();
   const canPerformActions = useCanPerformActions();
+  // const isAdmin = useIsAdmin();
+  const { data: adminAmountData } = useAdminTotalAmount();
   const [deleteModal, setDeleteModal] = useState<{
     isOpen: boolean;
     transaction: RecentTransaction | null;
@@ -213,6 +213,7 @@ export default function Home() {
     isOpen: false,
     transaction: null,
   });
+  const [setAmountModalOpen, setSetAmountModalOpen] = useState(false);
 
   const { data: transactions = [], isLoading } = useQuery({
     queryKey: ["recentTransactions"],
@@ -261,9 +262,9 @@ export default function Home() {
       (t: Transaction) => t.status === "pending"
     ).length;
 
-    const failed = transactionData.filter(
-      (t: Transaction) => t.status === "failed"
-    ).length;
+    // const failed = transactionData.filter(
+    //   (t: Transaction) => t.status === "failed"
+    // ).length;
 
     // Calculate success rate
     const successRate =
@@ -447,24 +448,23 @@ export default function Home() {
 
               <div className="flex items-center gap-3">
                 <Link href="/search">
-                  <button className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 hover:border-gray-400 hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                  <button className="inline-flex items-center gap-2 p-4 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 hover:border-gray-400 hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
                     <Search className="w-4 h-4" />
                     Search
                   </button>
                 </Link>
-               
 
-                <button className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 hover:border-gray-400 hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                {/* <button className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 hover:border-gray-400 hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
                   <RefreshCw className="w-4 h-4" />
                   Refresh
-                </button>
-                <button className="inline-flex items-center px-4 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg shadow-sm hover:bg-blue-700 hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                </button> */}
+                {/* <button className="inline-flex items-center px-4 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg shadow-sm hover:bg-blue-700 hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
                   <Download className="w-4 h-4 mr-2" />
                   Export&nbsp;
                   <span className="max-md:hidden">Report</span>
-                </button>
-                 {/* User Profile Dropdown */}
-                 {user && (
+                </button> */}
+                {/* User Profile Dropdown */}
+                {user && (
                   <UserProfileDropdown user={user} onLogout={handleLogout} />
                 )}
               </div>
@@ -512,6 +512,57 @@ export default function Home() {
                 </div>
               </div>
             ))}
+
+            {/* Admin Total Amount Card - Only visible for regular admins */}
+            {user?.role === "admin" && adminAmountData && (
+              <div className="bg-white border rounded-xl shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden border-purple-200">
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="p-3 rounded-lg bg-purple-50">
+                      <DollarSign className="w-6 h-6 text-purple-600" />
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <TrendingUp className="w-4 h-4 text-emerald-500" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 mb-1">
+                      Total Amount Available
+                    </p>
+                    <p className="text-3xl font-bold text-gray-900 mb-2">
+                      ₦{adminAmountData.totalAmountAvailable.toLocaleString()}
+                    </p>
+                    <p className="text-sm font-medium text-purple-600 flex items-center">
+                      {adminAmountData.dueType.charAt(0).toUpperCase() +
+                        adminAmountData.dueType.slice(1)}{" "}
+                      Admin
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Set Admin Amount Button - Only visible for superAdmin */}
+            {canPerformActions && (
+              <div className="bg-white border rounded-xl shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden border-blue-200">
+                <div className="p-6 flex flex-col items-center justify-center h-full min-h-[140px]">
+                  <div className="p-3 rounded-lg bg-blue-50 mb-3">
+                    <Settings className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <p className="text-sm font-medium text-gray-600 mb-2 text-center">
+                    Admin Amount Settings
+                  </p>
+                  <button
+                    onClick={() => setSetAmountModalOpen(true)}
+                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 hover:border-blue-300 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                  >
+                    <Settings className="w-4 h-4" />
+                    Set Amount
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Enhanced Recent Transactions */}
@@ -534,10 +585,10 @@ export default function Home() {
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <button className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200">
+                  {/* <button className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200">
                     <Filter className="w-4 h-4" />
                     Filter
-                  </button>
+                  </button> */}
                   <Link href="/transactions">
                     <button className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 hover:border-blue-300 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
                       View All Transactions
@@ -651,6 +702,12 @@ export default function Home() {
         onClose={() => setDeleteModal({ isOpen: false, transaction: null })}
         onConfirm={handleDeleteTransaction}
         transaction={deleteModal.transaction}
+      />
+
+      {/* Set Admin Amount Modal */}
+      <SetAdminAmountModal
+        isOpen={setAmountModalOpen}
+        onClose={() => setSetAmountModalOpen(false)}
       />
     </>
   );

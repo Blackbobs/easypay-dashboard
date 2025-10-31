@@ -3,6 +3,12 @@ import { axiosConfig } from "@/utils/axios-config";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import {
+  getAdminTotalAmount,
+  setAdminTotalAmount,
+  getAllAdmins,
+  SetAdminTotalAmountRequest,
+} from "@/lib/admin-amount";
 
 export interface User {
   id: string;
@@ -11,6 +17,7 @@ export interface User {
   college: string;
   department: string;
   role: "admin" | "superAdmin" | "user";
+  totalAmountAvailable?: number;
 }
 
 interface UserResponse {
@@ -20,8 +27,6 @@ interface UserResponse {
 }
 
 export const useCurrentUser = () => {
-
-  
   const response = useQuery({
     queryKey: ["user"],
     queryFn: async (): Promise<User | null> => {
@@ -52,14 +57,14 @@ export const useLogout = () => {
     onSuccess: () => {
       // Clear all queries from cache
       queryClient.clear();
-      
+
       // Force a hard redirect to ensure cookies are cleared
       window.location.href = "/login";
     },
     onError: (error) => {
       console.error("Logout failed:", error);
       toast.error("Failed to logout");
-      
+
       // Even if API call fails, clear frontend state and redirect
       queryClient.clear();
       window.location.href = "/login";
@@ -90,7 +95,7 @@ export const useCanPerformActions = () => {
 
 export const useUserPermissions = () => {
   const role = useUserRole();
-  
+
   return {
     canView: role === "admin" || role === "superAdmin",
     canEdit: role === "superAdmin",
@@ -100,4 +105,58 @@ export const useUserPermissions = () => {
     isAdmin: role === "admin" || role === "superAdmin",
     role,
   };
+};
+
+// Hook for admins to get their total amount available
+export const useAdminTotalAmount = () => {
+  const role = useUserRole();
+  // Only regular admins can view their total amount (not superAdmin)
+  const isRegularAdmin = role === "admin";
+
+  return useQuery({
+    queryKey: ["adminTotalAmount"],
+    queryFn: async () => {
+      const response = await getAdminTotalAmount();
+      return response.data;
+    },
+    enabled: isRegularAdmin ?? false,
+    staleTime: 2 * 60 * 1000, // 2 minutes
+  });
+};
+
+// Hook for superAdmin to get all admins
+export const useAllAdmins = () => {
+  const role = useUserRole();
+  const isSuperAdmin = role === "superAdmin";
+
+  return useQuery({
+    queryKey: ["allAdmins"],
+    queryFn: async () => {
+      const response = await getAllAdmins();
+      return response.data;
+    },
+    enabled: isSuperAdmin ?? false,
+    staleTime: 2 * 60 * 1000, // 2 minutes
+  });
+};
+
+// Hook for superAdmin to set admin total amount
+export const useSetAdminTotalAmount = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: SetAdminTotalAmountRequest) => setAdminTotalAmount(data),
+    onSuccess: (response) => {
+      toast.success(
+        `Total amount set successfully for ${response.data.username}`
+      );
+      queryClient.invalidateQueries({ queryKey: ["adminTotalAmount"] });
+      queryClient.invalidateQueries({ queryKey: ["allAdmins"] });
+    },
+    onError: (error: any) => {
+      const errorMessage =
+        error?.response?.data?.message || "Failed to set admin total amount";
+      toast.error(errorMessage);
+    },
+  });
 };
