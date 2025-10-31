@@ -14,15 +14,11 @@ import {
   TrendingUp,
   DollarSign,
   Eye,
-  Settings,
   ArrowUpRight,
   Activity,
   CheckCircle,
   Clock,
   TrendingDown,
-  Filter,
-  Download,
-  RefreshCw,
   Trash2,
   LogOut,
   User,
@@ -548,7 +544,7 @@ export default function Home() {
               <div className="bg-white border rounded-xl shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden border-blue-200">
                 <div className="p-6 flex flex-col items-center justify-center h-full min-h-[140px]">
                   <div className="p-3 rounded-lg bg-blue-50 mb-3">
-                    <Settings className="w-6 h-6 text-blue-600" />
+                    <span className="text-2xl font-bold text-blue-600">₦</span>
                   </div>
                   <p className="text-sm font-medium text-gray-600 mb-2 text-center">
                     Admin Amount Settings
@@ -557,7 +553,7 @@ export default function Home() {
                     onClick={() => setSetAmountModalOpen(true)}
                     className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 hover:border-blue-300 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                   >
-                    <Settings className="w-4 h-4" />
+                    <span className="font-bold">₦</span>
                     Set Amount
                   </button>
                 </div>

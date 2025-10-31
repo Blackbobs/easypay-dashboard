@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X, DollarSign, Loader2, User, Search } from "lucide-react";
+import { X, Loader2, User, Search } from "lucide-react";
 import { useSetAdminTotalAmount, useAllAdmins } from "@/hooks/useUser";
 
 interface SetAdminAmountModalProps {
@@ -82,7 +82,7 @@ export default function SetAdminAmountModal({
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-blue-100 rounded-lg">
-                <DollarSign className="w-6 h-6 text-blue-600" />
+                <span className="text-2xl font-bold text-blue-600">₦</span>
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">
@@ -240,7 +240,7 @@ export default function SetAdminAmountModal({
                 </>
               ) : (
                 <>
-                  <DollarSign className="w-4 h-4" />
+                  <span className="font-bold">₦</span>
                   Set Amount
                 </>
               )}
