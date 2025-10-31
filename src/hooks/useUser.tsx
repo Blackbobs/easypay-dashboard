@@ -2,7 +2,6 @@
 import { axiosConfig } from "@/utils/axios-config";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 import {
   getAdminTotalAmount,
   setAdminTotalAmount,
@@ -153,9 +152,10 @@ export const useSetAdminTotalAmount = () => {
       queryClient.invalidateQueries({ queryKey: ["adminTotalAmount"] });
       queryClient.invalidateQueries({ queryKey: ["allAdmins"] });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       const errorMessage =
-        error?.response?.data?.message || "Failed to set admin total amount";
+        (error as { response?: { data?: { message?: string } } })?.response
+          ?.data?.message || "Failed to set admin total amount";
       toast.error(errorMessage);
     },
   });
